@@ -399,11 +399,29 @@ export const ObsidianFlavoredMarkdown: QuartzTransformerPlugin<
                   },
                 );
               }
-
+              
               if (opts.highlight) {
                 node.value = node.value.replace(
                   /==((?!=).+?)==/g,
-                  `<span class="text-highlight">$1</span>`,
+                  (match, text) => {
+                    const colors = {
+                      "🔴": " text-highlight-red",
+                      "🟠": " text-highlight-orange",
+                      "🟡": " text-highlight-yellow",
+                      "🟢": " text-highlight-green",
+                      "🔵": " text-highlight-blue",
+                      "🟣": " text-highlight-purple",
+                    };
+              
+                    const emoji = Object.keys(colors).find((key) =>
+                      text.startsWith(key),
+                    );
+              
+                    const color = emoji ? colors[emoji] : "";
+                    const content = emoji ? text.slice(emoji.length).trim() : text;
+              
+                    return `<span class="text-highlight${color}">${content}</span>`;
+                  },
                 );
               }
 
