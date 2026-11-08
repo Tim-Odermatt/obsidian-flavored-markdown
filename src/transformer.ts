@@ -324,12 +324,32 @@ export const ObsidianFlavoredMarkdown: QuartzTransformerPlugin<
               (node) => node.type === "highlight",
               (node, index: number | undefined, parent: Parent | undefined) => {
                 if (parent == null || index == null) return;
+
                 const highlightNode = node as HighlightNode;
-                const text = highlightNode.children?.map(getLiteralValue).join("") ?? "";
+                const text =
+                  highlightNode.children?.map(getLiteralValue).join("") ?? "";
+
+                const colors: Record<string, string> = {
+                  "🔴": " text-highlight-red",
+                  "🟠": " text-highlight-orange",
+                  "🟡": " text-highlight-yellow",
+                  "🟢": " text-highlight-green",
+                  "🔵": " text-highlight-blue",
+                  "🟣": " text-highlight-purple",
+                };
+
+                const emoji = Object.keys(colors).find((key) =>
+                  text.startsWith(key),
+                );
+
+                const color = emoji ? colors[emoji] : "";
+                const content = emoji ? text.slice(emoji.length).trim() : text;
+
                 parent.children[index] = {
                   type: "html",
-                  value: `<span class="text-highlight">${text}</span>`,
+                  value: `<span class="text-highlight${color}">${content}</span>`,
                 };
+
                 return SKIP;
               },
             );
@@ -404,7 +424,7 @@ export const ObsidianFlavoredMarkdown: QuartzTransformerPlugin<
                 node.value = node.value.replace(
                   /==((?!=).+?)==/g,
                   (match, text) => {
-                    const colors = {
+                    const colors: Record<string, string> = {
                       "🔴": " text-highlight-red",
                       "🟠": " text-highlight-orange",
                       "🟡": " text-highlight-yellow",
